@@ -6,6 +6,9 @@ format (to stdout).
 ## Status
 Initial version. Pending test case development.
 
+## Requirements
+Python 2.7+ (tested on 2.7.5)
+
 ## Usage:
 ```
 $ python fsa.py ROOT_PATH                   - File(s) or path to audit.

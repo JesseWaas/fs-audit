@@ -251,17 +251,22 @@ def walk_path(path, recursive=False, hash_algorithm=HASH_FN, ignore_files=None):
         hash_algorithm: hashlib Algorithm such as hashlib.sha1()
         ignore_files: List of file patterns to ignore (tested with fnmatch)
     """
-    for root, dirs, files in os.walk(path):
-        for file_name in files:
-            file_path = os.path.join(root, file_name)
 
-            if ignore_file(file_path, ignore_files):
-                continue
+    if not os.path.isdir(path):
+        if not ignore_file(path, ignore_files):
+            yield FileMeta(path, hash_algorithm.copy())
+    else:
+        for root, dirs, files in os.walk(path):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
 
-            yield FileMeta(file_path, hash_algorithm.copy())
+                if ignore_file(file_path, ignore_files):
+                    continue
 
-        if not recursive:
-            break
+                yield FileMeta(file_path, hash_algorithm.copy())
+
+            if not recursive:
+                break
 
 
 def main():
