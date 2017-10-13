@@ -209,16 +209,17 @@ def hash_file(path, hash_algorithm=HASH_FN):
         path: Path to file for which hash is to be generated
         hash_algorithm: hashlib Algorithm such as hashlib.sha256()
     """
+    hash_algorithm = hash_algorithm.copy()
+
     with open(path, "rb") as file_to_hash:
 
-        def block_read():
-            return file_to_hash.read(BLOCK_SIZE)
-
-        for block in iter(block_read, ""):
-            hash_algorithm.update(block)
-
-        return hash_algorithm.hexdigest()
-
+        while True:
+            block = file_to_hash.read(BLOCK_SIZE)
+            if block:
+                hash_algorithm.update(block)
+            else:
+                return hash_algorithm.hexdigest()
+                
 
 def ignore_file(ignore_path, ignore_files):
     """Check if specified file path matches ignore patterns
@@ -254,7 +255,7 @@ def walk_path(path, recursive=False, hash_algorithm=HASH_FN, ignore_files=None):
 
     if not os.path.isdir(path):
         if not ignore_file(path, ignore_files):
-            yield FileMeta(path, hash_algorithm.copy())
+            yield FileMeta(path, hash_algorithm)
     else:
         for root, dirs, files in os.walk(path):
             for file_name in files:
@@ -263,7 +264,7 @@ def walk_path(path, recursive=False, hash_algorithm=HASH_FN, ignore_files=None):
                 if ignore_file(file_path, ignore_files):
                     continue
 
-                yield FileMeta(file_path, hash_algorithm.copy())
+                yield FileMeta(file_path, hash_algorithm)
 
             if not recursive:
                 break

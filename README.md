@@ -7,7 +7,7 @@ format (to stdout).
 Initial version. Pending test case development.
 
 ## Requirements
-Python 2.7+ (tested on 2.7.5)
+Python 2.7+ (tested on 2.7.5 and 3.5.2)
 
 ## Usage:
 ```
