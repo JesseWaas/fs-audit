@@ -1,10 +1,16 @@
 # fs-audit
-Command line tool for collecting filesystem meta-data. Iterates through input
-files, and outputs file hash and meta-data using the specified algorithm and
-format (to stdout).
+Command line tool for collecting and analysing filesystem meta-data. Supports 
+capture of meta-data for a user defined set of files, and post processing of
+that meta-data to highlight differences.
+
+Captured meta-data includes various os.stat attributes as well as a file hash.
+See FORMAT_STRING below for a full list.
+
+This tool is intended to assist with auditing of software deployments accross
+multiple remote servers.
 
 ## Status
-Initial version. Pending test case development.
+Unstable.
 
 ## Requirements
 Python 2.7+ (tested on 2.7.5 and 3.5.2)
@@ -18,6 +24,9 @@ $ python fsa.py ROOT_PATH                   - File(s) or path to audit.
                 [--algorithm ALGORITHM]     - File hash algorithm (see below).
                 [--string FORMAT_STRING]    - Output str.format template (see below).
                 [--ignore FILE_NAME_FILTER] - Ignore fnmatch pattern (can specify multiple).
+                
+                [--diff [DIFF [DIFF ...]]   - Diff the specified archive file records.
+                
                 [--help]                    - Display usage information.
 
 FORMAT_STRING defines template for output using the following keywords:
