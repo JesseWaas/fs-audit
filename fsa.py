@@ -579,47 +579,66 @@ def cmd_walk(args):
 
 def cmd_diff(args):
     """Diff file system based on previously captured meta-data."""
-    file_meta_collections = []
 
-    PATH_KEY = "path"
-    INTERESTING_KEYS = ["hash", "size"]
+    key_len = 6
+    path_len = 40
+    key_fmt = "{:^" + str(key_len) + "}"
+    path_fmt = "{:" + str(path_len) + "}"
+    path_key = "path"
+
+    interesting_keys = args.diffkeys if args.diffkeys else ["hash"]
+
+    file_meta_collections = []
 
     # Input analysis archives
     for path in args.diff:
-        file_meta_collection = FileMetaCollection(PATH_KEY, name=path, from_json_file=path)
+        file_meta_collection = FileMetaCollection(path_key, name=path,
+                                                  from_json_file=path)
+
         file_meta_collections.append(file_meta_collection)
 
-    primary_key_values = get_key_value_superset(file_meta_collections, PATH_KEY)
+    primary_key_values = get_key_value_superset(file_meta_collections,
+                                                path_key)
+
+    interesting_keys_txt = "".join(
+        (key_fmt.format(k) for k in interesting_keys))
+
+    column_header_txt = (path_fmt + "{}" + key_fmt).format(
+        "File @ Archive", interesting_keys_txt, "sum")
 
     print()
-
-    interesting_keys_txt = "".join(("{:^10}".format(k) for k in INTERESTING_KEYS))
-    column_header_txt = "{:40}{}{:^10}".format("File @ Archive", interesting_keys_txt, "sum")
-
     print(column_header_txt)
 
     # For each file for which we have meta-data
     for file_key in primary_key_values:
 
         # Obtain meta data for different version of the file
-        meta_list = [m.get_meta(PATH_KEY, file_key) for m in file_meta_collections]
+        meta_list = [
+            m.get_meta(path_key, file_key) for m in file_meta_collections]
 
-        diff = group_diff(INTERESTING_KEYS, meta_list)
+        diff = group_diff(interesting_keys, meta_list)
 
         # For each comparison key that we are interested in
         for archive_path, (meta, key_groups, group) in zip(args.diff, diff):
-            row_name = "{} @ {}".format(file_key, archive_path)
-            key_group_txt = "".join(("{:^10}".format(g) for g in key_groups.values()))
+            file_and_archive = "{} @ {}".format(
+                file_key, os.path.basename(archive_path))
 
-            print("{:40}{}{:^10}".format(row_name, key_group_txt, group))
+            file_and_archive = (".." + file_and_archive[path_len-3:]) if len(
+                file_and_archive) > (path_len-3) else file_and_archive
+
+            key_group_txt = "".join((key_fmt.format(
+                g) for g in key_groups.values()))
+
+            print((path_fmt + "{}" + key_fmt).format(
+                file_and_archive, key_group_txt, group))
 
         print()
 
 
 def main():
     """Command line interface for generating filesystem meta-data"""
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
-                                     description=
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter, description=
 # pylint: disable=bad-continuation
 """File system audit tool. A command line tool for collecting filesystem
 meta-data. Iterates through input files, and outputs file hash and meta-data
@@ -668,6 +687,8 @@ Note:
                         help="Output to CSV file.")
     parser.add_argument("--diff", nargs="*",
                         help="Diff the specified archive files.")
+    parser.add_argument("--diffkeys", nargs="*",
+                        help="Meta data key values to compare (see [1])")
 
     args = parser.parse_args()
 
