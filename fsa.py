@@ -431,12 +431,15 @@ def group_diff(interesting_keys, meta_files):
 
     for meta in meta_files:
 
+        if not meta:
+            result.append(None)
+            continue
+
         # Use an OrderedDict() here so that groups.items() is produced in
         # order consistant with interesting_keys. Note that this
         #
         # groups = {key=INTERESTING_KEY, val=DIFF_GROUP_INTEGER}
         groups = OrderedDict()
-
         for key in interesting_keys:
             cache = single_key_value_cache[key]
             meta_key_value = meta[key]
@@ -625,15 +628,22 @@ def cmd_diff(args):
         meta_list = [
             m.get_meta(path_key, file_key) for m in file_meta_collections]
 
-        diff = group_diff(interesting_keys, meta_list)
+        diffs = group_diff(interesting_keys, meta_list)
 
         # For each comparison key that we are interested in
-        for archive_path, (meta, key_groups, group) in zip(args.diff, diff):
+        for archive_path, diff in zip(args.diff, diffs):
+
             file_and_archive = "{} @ {}".format(
                 file_key, os.path.basename(archive_path))
 
             file_and_archive = (".." + file_and_archive[path_len-3:]) if len(
                 file_and_archive) > (path_len-3) else file_and_archive
+
+            if not diff:
+               print(("Absent: " + path_fmt).format(file_and_archive))
+               continue
+
+            (meta, key_groups, group) = diff
 
             key_group_txt = "".join((key_fmt.format(
                 g) for g in key_groups.values()))
