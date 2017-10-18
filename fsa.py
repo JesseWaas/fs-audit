@@ -518,7 +518,10 @@ def walk_path(path, recursive=False, hash_algorithm=HASH_FN, ignore_files=None):
 
     if not os.path.isdir(path):
         if not ignore_file(path, ignore_files):
-            yield FileMeta(path, hash_algorithm)
+            try:
+                yield FileMeta(path, hash_algorithm)
+            except IOError:
+                yield None
     else:
         for root, dirs, files in os.walk(path):
             for file_name in files:
@@ -527,11 +530,13 @@ def walk_path(path, recursive=False, hash_algorithm=HASH_FN, ignore_files=None):
                 if ignore_file(file_path, ignore_files):
                     continue
 
-                yield FileMeta(file_path, hash_algorithm)
+                try:
+                    yield FileMeta(file_path, hash_algorithm)
+                except IOError:
+                    yield None
 
             if not recursive:
                 break
-
 
 def cmd_walk(args):
     """Analyse files on file system."""
@@ -560,6 +565,10 @@ def cmd_walk(args):
         for file_meta in walk_path(file_path, recursive=args.recursive,
                                    hash_algorithm=hash_algorithm,
                                    ignore_files=args.ignore):
+
+            if not file_meta:
+                print("File read error".format(file_path))
+                continue
 
             if args.string:
                 print(file_meta.to_string(fmt=args.string))
