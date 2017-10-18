@@ -25,22 +25,29 @@ $ python fsa.py ROOT_PATH                   - File(s) or path to audit.
                 [--string FORMAT_STRING]    - Output str.format template (see below).
                 [--ignore FILE_NAME_FILTER] - Ignore fnmatch pattern (can specify multiple).
                 
-                [--diff [DIFF [DIFF ...]]   - Diff the specified archive file records.
+                [--diff DIFF ...            - Diff the specified archive file records.
+                [--diffkeys KEYS ...        - Meta data key values to compare (see below).
                 
                 [--help]                    - Display usage information.
 
-FORMAT_STRING defines template for output using the following keywords:
+KEYS file meta data key values:
+    name    - File name (no path)
+    path    - File name with path
+    mode    - Protection bits (as octal permissions)
+    uid     - User ID of owner
+    gid     - Group ID of owener
+    size    - Size of file in bytes
+    atime   - Time of most recent access
+    mtime   - Time of most recent content modification
+    ctime   - Platform dependent; time of most recent meta data change in
+              unix, or time of creation in windows.
+    hash    - File hash value
+
+FORMAT_STRING defines template for output using the above KEY inside curley braces:
     {name}  - File name (no path)
     {path}  - File name with path
     {mode}  - Protection bits (as octal permissions)
-    {uid}   - User ID of owner
-    {gid}   - Group ID of owener
-    {size}  - Size of file in bytes
-    {atime} - Time of most recent access
-    {mtime} - Time of most recent content modification
-    {ctime} - Platform dependent; time of most recent meta data change in
-              unix, or time of creation in windows.
-    {hash}  - File hash value
+    ...
 
 ALGORITHM defines file hashing algorithm:
     md5
