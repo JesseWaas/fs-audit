@@ -585,7 +585,7 @@ def cmd_walk(args):
         if args.csv:
             meta_file_collection.to_csv(args.csv)
 
-        elif args.json:
+        if args.json:
             meta_file_collection.to_json(args.json)
 
 
