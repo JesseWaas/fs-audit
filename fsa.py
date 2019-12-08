@@ -295,7 +295,7 @@ class FileMetaCollection(object):
         with open(path, "wb") as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(FileMeta.KEYS)
-            csv_writer.writerows((x.to_dict() for x in self.meta_list))
+            csv_writer.writerows((x.to_list() for x in self.meta_list))
 
     def to_json(self, path):
         """Save FileMeta collection to JSON file.
